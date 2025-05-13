@@ -48,13 +48,43 @@ The MIMIC-III Clinical Prediction System provides real-time monitoring and visua
 3. Start the visualization server: `python scripts/serve_visualizations.py`
 4. Access the dashboard at: http://localhost:8080/interactive_dashboard.html
 
-## Note on Data Files
+## Data Generation and Models
 
-This repository does not include the large data files and trained models from the original project. To use this system with real data, you would need to:
+### Demo Mode with Synthetic Data
 
-1. Obtain access to the MIMIC-III database
-2. Process the data according to the project's requirements
-3. Train the prediction models using the provided scripts
+This system includes a powerful `demo_monitor.py` script that generates realistic synthetic patient data. You **do not need** real MIMIC-III data to see the dashboard in action. The demo monitor:
+
+- Creates simulated patients with realistic vital signs (HR, temp, BP, SpO2)
+- Generates patterns of clinical deterioration (spike patterns in vital signs)
+- Simulates critical events (elevated heart rate, decreased oxygen saturation)
+- Produces mortality risk scores using API predictions
+
+The demo has been tested and produces realistic clinical scenarios, as seen in these sample patients:
+- Patient ID 63745: Mortality risk 0.60-0.68, showing critical HR patterns (140-160 bpm)
+- Patient ID 29809: Mortality risk 0.57-0.67, with gradual deterioration in vital signs
+- Patient ID 7543: Mortality risk 0.60-0.67, showing fever patterns (37.5-40.0°C)
+
+### Using Real MIMIC-III Data
+
+While the demo mode works out-of-the-box, this repository is missing the following from the full version:
+
+1. **Complete MIMIC-III Dataset** (62GB):
+   - Raw data files (4.3GB compressed CHARTEVENTS.csv.gz)
+   - Extracted CSV files (35GB for CHARTEVENTS.csv alone)
+
+2. **Trained Models**:
+   - Mortality prediction: Random Forest (64MB)
+   - Sepsis prediction: XGBoost (268KB)
+   - Readmission prediction: Gradient Boosting
+
+3. **Feature Data**:
+   - Pre-computed features in PKL format
+   - Processed training and test datasets
+
+To use real data instead of the demo, you would need:
+1. MIMIC-III database access (requires credentialing through PhysioNet)
+2. Trained models (can be recreated using scripts)
+3. The preprocessing pipeline to transform raw data into features
 
 ## License
 
