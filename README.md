@@ -1,135 +1,61 @@
-# MIMIC-III Clinical Prediction System
+# MIMIC-III Clinical Prediction System (Lightweight)
 
-This project provides tools for analysis, visualization, and predictive modeling using the MIMIC-III critical care database. The system includes a real-time patient monitoring dashboard with mortality risk prediction.
+This is a lightweight version of the MIMIC-III Clinical Prediction System. This repository contains the dashboard and scripts without the large data files.
 
-## Features
+## Overview
 
-- **Interactive Patient Monitoring Dashboard**
-  - Real-time monitoring of vital signs in separate visualizations
-  - Heart rate, temperature, blood pressure, and oxygen saturation tracking
-  - Mortality risk predictions with alerts for high-risk patients
-  - Responsive, user-friendly interface with anti-caching measures
+The MIMIC-III Clinical Prediction System provides real-time monitoring and visualization of patient vital signs with mortality risk prediction. This lightweight repository includes:
 
-- **Real-time Data Generation**
-  - Simulated patient monitoring data for demonstration
-  - Customizable vital sign patterns with realistic clinical changes
-  - Support for both normal and critical patient scenarios
+- Interactive dashboard with safe destroy checks
+- Separated vital signs visualizations (heart rate, temperature, blood pressure, SpO2)
+- Real-time update capabilities (2-second intervals)
+- Support scripts for API, data generation, and visualization
 
-- **Clinical Prediction API**
-  - REST API for making mortality predictions
-  - Machine learning models trained on MIMIC-III data
-  - JSON-based data exchange format
+## Included Components
 
-- **Visualization Server**
-  - Lightweight HTTP server for dashboard delivery
-  - No-cache headers for real-time updates
-  - Support for multiple dashboard types
+- **Interactive Dashboard (`data/results/interactive_dashboard.html`)**
+  - Real-time monitoring with separate visualizations
+  - Mortality risk visualization
+  - Mobile-friendly responsive design
+  - Anti-caching measures
+
+- **Scripts**
+  - `api.py`: REST API for data and predictions
+  - `demo_monitor.py`: Patient data simulation
+  - `serve_visualizations.py`: Dashboard web server
+  - `prediction_script.py`: Core prediction logic
 
 ## Getting Started
 
 ### Prerequisites
 
 - Python 3.8+
-- pip package manager
+- Required Python packages (listed in requirements.txt)
 
-### Installation
+### Setup
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/MIMICIII.git
-   cd MIMICIII
+1. Clone this repository
+2. Install dependencies: `pip install -r requirements.txt`
+3. Create the necessary directories if they don't exist:
    ```
-
-2. Install the required packages:
-   ```bash
-   pip install -r requirements.txt
+   mkdir -p data/results data/uploads models/mortality models/readmission models/sepsis
    ```
 
 ### Running the System
 
-1. Start the API server:
-   ```bash
-   python scripts/api.py
-   ```
-
-2. Start the demo monitor (data generator):
-   ```bash
-   python scripts/demo_monitor.py
-   ```
-
-3. Start the visualization server:
-   ```bash
-   python scripts/serve_visualizations.py
-   ```
-
+1. Start the API server: `python scripts/api.py`
+2. Start the demo monitor: `python scripts/demo_monitor.py`
+3. Start the visualization server: `python scripts/serve_visualizations.py`
 4. Access the dashboard at: http://localhost:8080/interactive_dashboard.html
 
-## Dashboard Features
+## Note on Data Files
 
-The interactive dashboard provides:
+This repository does not include the large data files and trained models from the original project. To use this system with real data, you would need to:
 
-- Separate visualizations for each vital sign
-- Color-coded charts with appropriate clinical ranges
-- Real-time updates every 2 seconds
-- Mortality risk calculation and visualization
-- Mobile-friendly responsive design
-
-## API Endpoints
-
-- `GET /health`: Health check endpoint
-- `GET /api/available_models`: List available prediction models
-- `POST /api/predict`: Submit patient data for prediction
-- `GET /api/time_series_data`: Get the latest patient time series data
-
-## Project Structure
-
-- `data/`: Contains data files and results
-- `models/`: Contains trained machine learning models
-- `scripts/`: Contains Python scripts for running components
-- `src/`: Source code for utilities and libraries
+1. Obtain access to the MIMIC-III database
+2. Process the data according to the project's requirements
+3. Train the prediction models using the provided scripts
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- MIMIC-III database (Johnson AEW, Pollard TJ, Shen L, Lehman L, Feng M, Ghassemi M, Moody B, Szolovits P, Celi LA, and Mark RG. MIMIC-III, a freely accessible critical care database. Scientific Data (2016).)
-
-## System Components
-
-- **API Server** (port 8000): Handles prediction requests and data storage
-- **Demo Monitor**: Simulates patient data generation
-- **Visualization Server** (port 8080): Serves the interactive dashboard
-
-## Directory Structure
-
-```
-MIMICIII/
-├── data/
-│   ├── results/        # For visualization outputs
-│   └── uploads/        # For temporary storage
-├── models/             # For ML models
-├── scripts/
-│   ├── api.py         # API server
-│   ├── demo_monitor.py # Patient data simulation
-│   ├── serve_visualizations.py # Dashboard server
-│   └── prediction_script.py # Core prediction logic
-├── README.md
-└── requirements.txt
-```
-
-## Requirements
-
-- Python 3.8+
-- Flask
-- scikit-learn
-- pandas
-- numpy
-- joblib
-
-## Notes
-
-- The system uses simulated patient data for demonstration
-- Mortality risk predictions are based on vital signs
-- The dashboard updates every 5 seconds 
+This project is licensed under the MIT License.
