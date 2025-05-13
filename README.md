@@ -2,6 +2,23 @@
 
 This is a lightweight version of the MIMIC-III Clinical Prediction System. This repository contains the dashboard and scripts without the large data files.
 
+## Quick Start with Pre-packaged ZIP
+
+For the quickest setup, download the [MIMICIII-dashboard.zip](https://github.com/richardvo-cs/MIMICIIIMVP/raw/main/MIMICIII-dashboard.zip) file (61KB) and unzip it:
+
+```bash
+unzip MIMICIII-dashboard.zip
+cd mimiciii_release
+pip install -r requirements.txt
+
+# Start in separate terminal windows:
+python scripts/api.py
+python scripts/demo_monitor.py
+python scripts/serve_visualizations.py
+```
+
+Then visit http://localhost:8080/interactive_dashboard.html to see the dashboard in action.
+
 ## Overview
 
 The MIMIC-III Clinical Prediction System provides real-time monitoring and visualization of patient vital signs with mortality risk prediction. This lightweight repository includes:
