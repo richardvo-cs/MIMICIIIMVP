@@ -1,23 +1,12 @@
-# MIMIC-III Clinical Prediction System (Lightweight)
+# MIMIC-III Clinical Prediction System
 
-This is a lightweight version of the MIMIC-III Clinical Prediction System. This repository contains the dashboard and scripts without the large data files.
-
-## Quick Start with Pre-packaged ZIP
-
-For the quickest setup, download the [MIMICIII-dashboard.zip](https://github.com/richardvo-cs/MIMICIIIMVP/raw/main/MIMICIII-dashboard.zip) file (61KB) and unzip it:
-
-```bash
-unzip MIMICIII-dashboard.zip
-cd mimiciii_release
-pip install -r requirements.txt
+This is a lightweight version of the MIMIC-III Clinical Prediction System for CSCI 4930 (Machine Learning) 
 
 # Start in separate terminal windows:
 python scripts/api.py
 python scripts/demo_monitor.py
 python scripts/serve_visualizations.py
-```
-
-Then visit http://localhost:8080/interactive_dashboard.html to see the dashboard in action.
+visit http://localhost:8080/interactive_dashboard.html afterwards!
 
 ## Overview
 
@@ -27,14 +16,6 @@ The MIMIC-III Clinical Prediction System provides real-time monitoring and visua
 - Separated vital signs visualizations (heart rate, temperature, blood pressure, SpO2)
 - Real-time update capabilities (2-second intervals)
 - Support scripts for API, data generation, and visualization
-
-## Included Components
-
-- **Interactive Dashboard (`data/results/interactive_dashboard.html`)**
-  - Real-time monitoring with separate visualizations
-  - Mortality risk visualization
-  - Mobile-friendly responsive design
-  - Anti-caching measures
 
 - **Scripts**
   - `api.py`: REST API for data and predictions
@@ -57,7 +38,6 @@ The MIMIC-III Clinical Prediction System provides real-time monitoring and visua
    ```
    mkdir -p data/results data/uploads models/mortality models/readmission models/sepsis
    ```
-
 ### Running the System
 
 1. Start the API server: `python scripts/api.py`
@@ -86,17 +66,6 @@ The demo has been tested and produces realistic clinical scenarios, as seen in t
 While the demo mode works out-of-the-box, this repository is missing the following from the full version:
 
 1. **Complete MIMIC-III Dataset** (62GB):
-   - Raw data files (4.3GB compressed CHARTEVENTS.csv.gz)
-   - Extracted CSV files (35GB for CHARTEVENTS.csv alone)
-
-2. **Trained Models**:
-   - Mortality prediction: Random Forest (64MB)
-   - Sepsis prediction: XGBoost (268KB)
-   - Readmission prediction: Gradient Boosting
-
-3. **Feature Data**:
-   - Pre-computed features in PKL format
-   - Processed training and test datasets
 
 To use real data instead of the demo, you would need:
 1. MIMIC-III database access (requires credentialing through PhysioNet)
