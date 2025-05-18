@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MIMIC-III Time Series Plot</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .chart-container { 
+            position: relative; 
+            height: 400px; 
+            width: 800px;
+            margin: 20px auto;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px;
+        }
+        .metric-selector {
+            padding: 8px;
+            margin-right: 10px;
+        }
+        .update-button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .intervention-container {
+            text-align: center;
+            margin: 20px auto;
+            width: 100%;
+        }
+        .intervention-button {
+            padding: 12px 24px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .intervention-button:hover {
+            background-color: #d32f2f;
+        }
+        .intervention-scheduled {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: fadeInOut 3s ease-in-out;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .alert {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center;">Patient Vital Signs Monitor</h1>
+    
+    <div class="controls">
+        <select id="metricSelector" class="metric-selector">
+            <option value="heart_rate">Heart Rate</option>
+            <option value="respiratory_rate">Respiratory Rate</option>
+            <option value="temperature">Temperature</option>
+            <option value="systolic_bp">Blood Pressure</option>
+            <option value="oxygen_saturation">Oxygen Saturation</option>
+        </select>
+        <button id="updateButton" class="update-button">Update Chart</button>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="timeSeriesChart"></canvas>
+    </div>
+
+    <div class="intervention-container">
+        <button id="interventionButton" class="intervention-button" style="display: none;">SCHEDULE INTERVENTION</button>
+    </div>
+
+    <div id="interventionScheduled" class="intervention-scheduled">
+        INTERVENTION SCHEDULED
+    </div>
+
+    <script>
+        let chart;
+        let currentMetric = 'heart_rate';
+        let normalRanges = {
+            heart_rate: { min: 60, max: 100 },
+            respiratory_rate: { min: 12, max: 20 },
+            temperature: { min: 36.5, max: 37.5 },
+            systolic_bp: { min: 90, max: 140 },
+            oxygen_saturation: { min: 95, max: 100 }
+        };
+
+        // Function to load time series data
+        async function loadTimeSeriesData() {
+            try {
+                const response = await fetch('http://localhost:8000/api/time_series_data');
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+                const data = await response.json();
+                updateChart(data);
+            } catch (error) {
+                console.error('Error loading time series data:', error);
+            }
+        }
+
+        // Function to update the chart
+        function updateChart(data) {
+            const ctx = document.getElementById('timeSeriesChart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            const timestamps = data.timestamps;
+            const actualValues = data[currentMetric];
+            const predictedValues = generatePredictedPath(actualValues);
+
+            // Check for alerts
+            const lastValue = actualValues[actualValues.length - 1];
+            const showAlert = lastValue < normalRanges[currentMetric].min || 
+                            lastValue > normalRanges[currentMetric].max;
+            
+            // Show/hide intervention button based on alert
+            document.getElementById('interventionButton').style.display = 
+                showAlert ? 'inline-block' : 'none';
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timestamps,
+                    datasets: [
+                        {
+                            label: 'Actual ' + currentMetric.replace('_', ' ').toUpperCase(),
+                            data: actualValues,
+                            borderColor: showAlert ? 'rgb(255, 0, 0)' : 'rgb(75, 192, 192)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Predicted Path',
+                            data: predictedValues,
+                            borderColor: 'rgb(255, 159, 64)',
+                            borderDash: [5, 5],
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: currentMetric.replace('_', ' ').toUpperCase()
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Add normal range lines
+            addNormalRangeLines(normalRanges[currentMetric]);
+        }
+
+        // Function to generate predicted path
+        function generatePredictedPath(actualValues) {
+            const lastValue = actualValues[actualValues.length - 1];
+            const normalRange = normalRanges[currentMetric];
+            const targetValue = (normalRange.min + normalRange.max) / 2;
+            
+            let predictedValues = [];
+            for (let i = 0; i < actualValues.length; i++) {
+                if (i < actualValues.length - 1) {
+                    predictedValues.push(null);
+                } else {
+                    predictedValues.push(lastValue);
+                }
+            }
+            
+            // Add future points
+            const futurePoints = 5;
+            const lastTimestamp = new Date();
+            
+            for (let i = 1; i <= futurePoints; i++) {
+                const progress = i / futurePoints;
+                const predictedValue = lastValue + (targetValue - lastValue) * progress;
+                predictedValues.push(predictedValue);
+            }
+            
+            return predictedValues;
+        }
+
+        // Function to add normal range lines
+        function addNormalRangeLines(range) {
+            const datasets = chart.data.datasets;
+            datasets.push({
+                label: 'Min Normal Range',
+                data: Array(chart.data.labels.length).fill(range.min),
+                borderColor: 'rgba(0, 255, 0, 0.5)',
+                borderDash: [2, 2],
+                fill: false
+            });
+            datasets.push({
+                label: 'Max Normal Range',
+                data: Array(chart.data.labels.length).fill(range.max),
+                borderColor: 'rgba(0, 255, 0, 0.5)',
+                borderDash: [2, 2],
+                fill: false
+            });
+            chart.update();
+        }
+
+        // Function to show intervention scheduled message
+        function showInterventionScheduled() {
+            const message = document.getElementById('interventionScheduled');
+            message.style.display = 'block';
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
+
+        // Event listeners
+        document.getElementById('metricSelector').addEventListener('change', (e) => {
+            currentMetric = e.target.value;
+            loadTimeSeriesData();
+        });
+
+        document.getElementById('updateButton').addEventListener('click', loadTimeSeriesData);
+
+        document.getElementById('interventionButton').addEventListener('click', () => {
+            showInterventionScheduled();
+            // Here you would typically make an API call to schedule the intervention
+            console.log('Intervention scheduled for metric:', currentMetric);
+        });
+
+        // Initial load
+        loadTimeSeriesData();
+        
+        // Update every 5 seconds
+        setInterval(loadTimeSeriesData, 5000);
+    </script>
+</body>
+</html>

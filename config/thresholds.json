@@ -1,0 +1,6 @@
+{
+    "mortality": {
+        "prediction_threshold": 0.3,
+        "explanation": "Lower threshold (0.3) increases recall from 57% to 78%, with F1 score improving from 0.69 to 0.70. This prioritizes identifying more at-risk patients over precision."
+    }
+} 
